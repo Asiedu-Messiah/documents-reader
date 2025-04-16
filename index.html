@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MESSIAH AI Document Reader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <style>
+        :root {
+            --ghana-red: #CF0921;
+            --ghana-yellow: #FCD20F;
+            --ghana-green: #006B3D;
+            --ghana-black: #000000;
+            --light: #f5f5f5;
+            --dark: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Welcome Page */
+        .welcome-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+                        url('https://www.ghanaweb.com/GhanaHomePage/imagelib/pics/574348472.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .welcome-page h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--ghana-yellow);
+            text-shadow: 0 0 10px rgba(252, 210, 15, 0.5);
+        }
+
+        .welcome-page p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-btn {
+            padding: 1rem 2rem;
+            background-color: var(--ghana-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .welcome-btn:hover {
+            background-color: var(--ghana-red);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(207, 9, 33, 0.4);
+        }
+
+        /* Ghana Flag Header */
+        .flag-header {
+            height: 10px;
+            background: linear-gradient(90deg, 
+                var(--ghana-red) 0%, 
+                var(--ghana-red) 30%, 
+                var(--ghana-yellow) 30%, 
+                var(--ghana-yellow) 70%, 
+                var(--ghana-green) 70%, 
+                var(--ghana-green) 100%);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Main Header */
+        header {
+            background-color: var(--ghana-black);
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(to right, var(--ghana-yellow), white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--ghana-yellow);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after, nav a.active::after {
+            width: 100%;
+        }
+
+        /* Main Content */
+        main {
+            padding-top: 150px;
+            padding-bottom: 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 20px;
+            margin-bottom: 2rem;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://www.ug.edu.gh/sites/default/files/styles/ug_home_page_slider/public/2021-09/ug-main.jpg?itok=9V5hJYgZ');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--ghana-yellow);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: white;
+        }
+
+        /* Document Reader Section */
+        .reader-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 2rem;
+        }
+
+        .upload-section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top: 5px solid var(--ghana-red);
+        }
+
+        .upload-area {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed var(--ghana-green);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--ghana-yellow);
+            background-color: rgba(252, 210, 15, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--ghana-green);
+            margin-bottom: 1rem;
+        }
+
+        .upload-area p {
+            text-align: center;
+            color: var(--ghana-green);
+            font-weight: 500;
+        }
+
+        #filePreview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: white;
+            display: none;
+        }
+
+        .upload-btn {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--ghana-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--ghana-red);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(207, 9, 33, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background-color: #b0bec5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .file-info {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--ghana-green);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Results Section */
+        .results-section {
+            flex: 2;
+            min-width: 300px;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--ghana-yellow);
+        }
+
+        .results-section h3 {
+            color: var(--ghana-red);
+            margin-bottom: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--ghana-yellow);
+        }
+
+        #textContent {
+            height: 350px;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .tts-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .tts-btn {
+            padding: 0.6rem 1rem;
+            background-color: var(--ghana-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .tts-btn:hover {
+            background-color: var(--ghana-red);
+        }
+
+        .tts-btn:disabled {
+            background-color: #b0bec5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: var(--ghana-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Supported Formats */
+        .formats-section {
+            margin-top: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--ghana-black);
+        }
+
+        .formats-section h3 {
+            color: var(--ghana-black);
+            margin-bottom: 1rem;
+        }
+
+        .formats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+
+        .format-card {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .format-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .format-icon {
+            font-size: 2rem;
+            color: var(--ghana-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .format-name {
+            font-weight: 500;
+            color: var(--ghana-black);
+        }
+
+        /* Support Section */
+        .support-section {
+            margin-top: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--ghana-yellow);
+        }
+
+        .support-section h3 {
+            color: var(--ghana-red);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .support-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .support-card {
+            background-color: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .support-card h4 {
+            color: var(--ghana-green);
+            margin-bottom: 1rem;
+        }
+
+        .support-card p {
+            margin-bottom: 0.5rem;
+        }
+
+        .support-card a {
+            color: var(--ghana-red);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .support-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--ghana-black);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--ghana-yellow);
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: #b0bec5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .welcome-page h1 {
+                font-size: 3rem;
+            }
+
+            .welcome-page p {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .upload-area {
+                height: 250px;
+            }
+
+            .welcome-page h1 {
+                font-size: 2.5rem;
+            }
+
+            .welcome-page p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Page -->
+    <div class="welcome-page" id="welcomePage">
+        <h1>MESSIAH</h1>
+        <p>Welcome to Messiah AI Document Reader - Your intelligent document processing solution</p>
+        <p>Proudly developed by Messiah(A BSc. Information Technology student) and with Ghana's national colors</p>
+        <button class="welcome-btn" id="enterBtn">Enter Application</button>
+    </div>
+
+    <!-- Ghana Flag Header -->
+    <div class="flag-header"></div>
+
+    <!-- Main Header -->
+    <header>
+        <div class="header-container">
+            <a href="#" class="logo">
+                <img src="logo.jpeg" alt="University of Ghana Logo">
+                <h1>Ghana AI Reader</h1>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="https://www.ug.edu.gh" target="_blank">UG Website</a></li>
+                    <li><a href="https://www.ug.edu.gh/computing" target="_blank">Comp. Science</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <section class="hero">
+            <h2>MESSIAH-Powered Document Reader</h2>
+            <p>Upload your documents and let our AI extract text for easy reading and analysis. Perfect for students, researchers, and professionals.</p>
+            <p>Now with Text-to-Speech functionality in male and female voices!</p>
+        </section>
+
+        <section class="reader-container">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-file-upload"></i>
+                    <p>Drag & drop your file here or click to browse</p>
+                    <div id="filePreview"></div>
+                </div>
+                <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" style="display: none;">
+                <button class="upload-btn" id="readBtn" disabled>
+                    <i class="fas fa-book-reader"></i> Read Document
+                </button>
+                <div class="file-info" id="fileInfo"></div>
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner"></i>
+                    <p>Processing document...</p>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h3>Document Content</h3>
+                <div id="textContent">
+                    <p style="text-align: center; color: #757575;">The extracted text will appear here after processing your document.</p>
+                </div>
+                <div class="tts-controls">
+                    <button class="tts-btn" id="maleVoiceBtn" disabled>
+                        <i class="fas fa-male"></i> Male Voice
+                    </button>
+                    <button class="tts-btn" id="femaleVoiceBtn" disabled>
+                        <i class="fas fa-female"></i> Female Voice
+                    </button>
+                    <button class="tts-btn" id="stopTtsBtn" disabled>
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button class="tts-btn" id="downloadAudioBtn" disabled>
+                        <i class="fas fa-download"></i> Download Audio
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="formats-section">
+            <h3>Supported File Formats</h3>
+            <p>Our AI reader supports various document formats commonly used in academic and professional settings.</p>
+            
+            <div class="formats-grid">
+                <div class="format-card">
+                    <div class="format-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="format-name">PDF Files</div>
+                </div>
+                <div class="format-card">
+                    <div class="format-icon">
+                        <i class="fas fa-file-word"></i>
+                    </div>
+                    <div class="format-name">Word Docs</div>
+                </div>
+                <div class="format-card">
+                    <div class="format-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <div class="format-name">Excel Files</div>
+                </div>
+                <div class="format-card">
+                    <div class="format-icon">
+                        <i class="fas fa-file-powerpoint"></i>
+                    </div>
+                    <div class="format-name">PowerPoint</div>
+                </div>
+                <div class="format-card">
+                    <div class="format-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="format-name">Text Files</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="support-section" id="support">
+            <h3>Support This Project</h3>
+            <div class="support-content">
+                <div class="support-card">
+                    <h4>Donate via Mobile Money</h4>
+                    <p>Help support the development of this project</p>
+                    <p><strong>MTN Mobile Money:</strong></p>
+                    <p>0544635571 (Asiedu Messiah)</p>
+                </div>
+                <div class="support-card">
+                    <h4>Contact Developer</h4>
+                    <p><i class="fas fa-phone"></i> <a href="tel:+233544635571">+233 54 463 5571</a></p>
+                    <p><i class="fab fa-whatsapp"></i> <a href="https://wa.me/233544635571">WhatsApp</a></p>
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:asiedu1827@gmail.com">asiedu1827@gmail.com</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="social-links">
+                <a href="https://www.facebook.com/univofgh/" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="https://twitter.com/UnivofGh" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.instagram.com/university_of_ghana/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.youtube.com/user/UniversityGhana" target="_blank"><i class="fab fa-youtube"></i></a>
+            </div>
+            <p class="copyright">© 2023 Ghana AI Document Reader. Developed with pride by MESSIAH at the University of Ghana.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Set PDF.js worker path
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+
+        // DOM Elements
+        const welcomePage = document.getElementById('welcomePage');
+        const enterBtn = document.getElementById('enterBtn');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const readBtn = document.getElementById('readBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const textContent = document.getElementById('textContent');
+        const fileInfo = document.getElementById('fileInfo');
+        const maleVoiceBtn = document.getElementById('maleVoiceBtn');
+        const femaleVoiceBtn = document.getElementById('femaleVoiceBtn');
+        const stopTtsBtn = document.getElementById('stopTtsBtn');
+        const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+
+        // Variables
+        let selectedFile = null;
+        let extractedText = '';
+        let speechSynthesis = window.speechSynthesis;
+        let currentUtterance = null;
+        let audioChunks = [];
+        let mediaRecorder;
+
+        // Initialize the app
+        function init() {
+            // Hide welcome page after clicking enter
+            enterBtn.addEventListener('click', () => {
+                welcomePage.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+
+            setupEventListeners();
+            checkTtsSupport();
+        }
+
+        // Check if Text-to-Speech is supported
+        function checkTtsSupport() {
+            if (!speechSynthesis) {
+                maleVoiceBtn.disabled = true;
+                femaleVoiceBtn.disabled = true;
+                stopTtsBtn.disabled = true;
+                downloadAudioBtn.disabled = true;
+                
+                const ttsControls = document.querySelector('.tts-controls');
+                ttsControls.innerHTML += '<p style="color: var(--ghana-red); font-size: 0.9rem; margin-top: 0.5rem;">Text-to-Speech not supported in your browser</p>';
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Click on upload area
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Handle file selection
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+            });
+
+            // Drag and drop events
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--ghana-yellow)';
+                uploadArea.style.backgroundColor = 'rgba(252, 210, 15, 0.1)';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--ghana-green)';
+                uploadArea.style.backgroundColor = 'transparent';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--ghana-green)';
+                uploadArea.style.backgroundColor = 'transparent';
+
+                const file = e.dataTransfer.files[0];
+                if (file) {
+                    handleFileUpload(file);
+                }
+            });
+
+            // Read button
+            readBtn.addEventListener('click', readDocument);
+
+            // TTS buttons
+            maleVoiceBtn.addEventListener('click', () => speakText('male'));
+            femaleVoiceBtn.addEventListener('click', () => speakText('female'));
+            stopTtsBtn.addEventListener('click', stopSpeaking);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+        }
+
+        // Handle file upload
+        function handleFileUpload(file) {
+            selectedFile = file;
+            
+            // Display file info
+            fileInfo.innerHTML = `
+                <strong>Selected File:</strong> ${file.name}<br>
+                <strong>Type:</strong> ${file.type}<br>
+                <strong>Size:</strong> ${(file.size / 1024).toFixed(2)} KB
+            `;
+            
+            // Display preview for images and PDFs
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    filePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%;">`;
+                    filePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                filePreview.innerHTML = '<i class="fas fa-file-pdf" style="font-size: 5rem; color: var(--ghana-red);"></i>';
+                filePreview.style.display = 'flex';
+                filePreview.style.justifyContent = 'center';
+                filePreview.style.alignItems = 'center';
+            } else {
+                const iconClass = getFileIconClass(file);
+                filePreview.innerHTML = `<i class="${iconClass}" style="font-size: 5rem; color: var(--ghana-green);"></i>`;
+                filePreview.style.display = 'flex';
+                filePreview.style.justifyContent = 'center';
+                filePreview.style.alignItems = 'center';
+            }
+            
+            uploadArea.querySelector('i').style.display = 'none';
+            uploadArea.querySelector('p').style.display = 'none';
+            
+            // Enable read button
+            readBtn.disabled = false;
+        }
+
+        // Get appropriate icon for file type
+        function getFileIconClass(file) {
+            if (file.type.includes('word')) return 'fas fa-file-word';
+            if (file.type.includes('excel')) return 'fas fa-file-excel';
+            if (file.type.includes('powerpoint')) return 'fas fa-file-powerpoint';
+            if (file.type.includes('text')) return 'fas fa-file-alt';
+            return 'fas fa-file';
+        }
+
+        // Read the uploaded document
+        async function readDocument() {
+            if (!selectedFile) return;
+            
+            // Show loading indicator
+            readBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+            textContent.innerHTML = '<p style="text-align: center;">Processing document...</p>';
+            
+            try {
+                extractedText = '';
+                
+                // Handle PDF files
+                if (selectedFile.type === 'application/pdf') {
+                    extractedText = await extractTextFromPDF(selectedFile);
+                } 
+                // Handle text-based files
+                else if (selectedFile.type.includes('text') || 
+                         selectedFile.type.includes('word') || 
+                         selectedFile.type.includes('xml')) {
+                    extractedText = await extractTextFromTextFile(selectedFile);
+                }
+                // For other formats, show a message
+                else {
+                    extractedText = `This file format (${selectedFile.type}) requires advanced processing. 
+                                    For full functionality, please convert to PDF or text format.`;
+                }
+                
+                // Display results
+                textContent.innerHTML = extractedText || '<p>No readable text found in this document.</p>';
+                
+                // Enable TTS buttons if we have text
+                if (extractedText && extractedText.trim().length > 0) {
+                    maleVoiceBtn.disabled = false;
+                    femaleVoiceBtn.disabled = false;
+                    stopTtsBtn.disabled = false;
+                    downloadAudioBtn.disabled = false;
+                } else {
+                    maleVoiceBtn.disabled = true;
+                    femaleVoiceBtn.disabled = true;
+                    stopTtsBtn.disabled = true;
+                    downloadAudioBtn.disabled = true;
+                }
+            } catch (error) {
+                console.error('Error reading document:', error);
+                textContent.innerHTML = `<p style="color: var(--ghana-red);">Error processing document: ${error.message}</p>`;
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+                readBtn.disabled = false;
+            }
+        }
+
+        // Extract text from PDF
+        async function extractTextFromPDF(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const typedArray = new Uint8Array(e.target.result);
+                        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                        let fullText = '';
+                        
+                        // Extract text from each page
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const text = textContent.items.map(item => item.str).join(' ');
+                            fullText += text + '\n\n';
+                        }
+                        
+                        resolve(fullText);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Extract text from text-based files
+        function extractTextFromTextFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        // Speak the extracted text
+        function speakText(voiceType) {
+            if (!extractedText || !speechSynthesis) return;
+            
+            // Stop any current speech
+            stopSpeaking();
+            
+            // Create a new utterance
+            currentUtterance = new SpeechSynthesisUtterance(extractedText);
+            
+            // Set voice properties based on selected type
+            if (voiceType === 'male') {
+                currentUtterance.rate = 0.9;
+                currentUtterance.pitch = 0.8;
+            } else { // female
+                currentUtterance.rate = 1.0;
+                currentUtterance.pitch = 1.2;
+            }
+            
+            // Find appropriate voice if available
+            const voices = speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                // Try to find a voice that matches the requested type
+                const preferredVoice = voices.find(voice => {
+                    if (voiceType === 'male') {
+                        return voice.name.includes('Male') || voice.name.includes('male') || 
+                               voice.name.includes('Google UK English Male') || 
+                               voice.name.includes('Microsoft David Desktop');
+                    } else {
+                        return voice.name.includes('Female') || voice.name.includes('female') || 
+                               voice.name.includes('Google UK English Female') || 
+                               voice.name.includes('Microsoft Zira Desktop');
+                    }
+                });
+                
+                if (preferredVoice) {
+                    currentUtterance.voice = preferredVoice;
+                } else {
+                    // Fallback to first available voice
+                    currentUtterance.voice = voices[0];
+                }
+            }
+            
+            // Speak the text
+            speechSynthesis.speak(currentUtterance);
+            
+            // Update button states
+            maleVoiceBtn.disabled = true;
+            femaleVoiceBtn.disabled = true;
+            stopTtsBtn.disabled = false;
+            
+            // Re-enable buttons when speech ends
+            currentUtterance.onend = () => {
+                maleVoiceBtn.disabled = false;
+                femaleVoiceBtn.disabled = false;
+                stopTtsBtn.disabled = true;
+            };
+        }
+
+        // Stop speaking
+        function stopSpeaking() {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                maleVoiceBtn.disabled = false;
+                femaleVoiceBtn.disabled = false;
+                stopTtsBtn.disabled = true;
+            }
+        }
+
+        // Download audio of the text
+        function downloadAudio() {
+            if (!extractedText) return;
+            
+            // Create a new utterance
+            const utterance = new SpeechSynthesisUtterance(extractedText);
+            
+            // Try to find a neutral voice
+            const voices = speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                utterance.voice = voices[0];
+            }
+            
+            // Create an audio context
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // Create a media stream destination
+            const destination = audioContext.createMediaStreamDestination();
+            
+            // Create a media recorder
+            mediaRecorder = new MediaRecorder(destination.stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Create download link
+                const a = document.createElement('a');
+                a.href = audioUrl;
+                a.download = 'document_audio.wav';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            
+            // Start recording
+            mediaRecorder.start();
+            
+            // Connect speech to audio context
+            const speechNode = new SpeechSynthesisAudioNode(audioContext);
+            speechNode.connect(destination);
+            
+            // Speak the text
+            speechNode.utterance = utterance;
+            speechSynthesis.speak(utterance);
+            
+            // Stop recording when speech ends
+            utterance.onend = () => {
+                mediaRecorder.stop();
+            };
+        }
+
+        // Custom node to connect speech synthesis to Web Audio API
+        class SpeechSynthesisAudioNode extends AudioNode {
+            constructor(context) {
+                super(context, {}, {
+                    numberOfInputs: 0,
+                    numberOfOutputs: 1,
+                    channelCount: 1,
+                    channelCountMode: 'explicit',
+                    channelInterpretation: 'speakers'
+                });
+                this.utterance = null;
+                this.gainNode = context.createGain();
+                this.gainNode.gain.value = 1.0;
+                this.gainNode.connect(this);
+            }
+            
+            onaudioprocess(event) {
+                if (this.utterance) {
+                    const inputBuffer = event.inputBuffer;
+                    const outputBuffer = event.outputBuffer;
+                    
+                    for (let channel = 0; channel < outputBuffer.numberOfChannels; channel++) {
+                        const inputData = inputBuffer.getChannelData(channel);
+                        const outputData = outputBuffer.getChannelData(channel);
+                        
+                        for (let sample = 0; sample < inputBuffer.length; sample++) {
+                            outputData[sample] = inputData[sample];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
